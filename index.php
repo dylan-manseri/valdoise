@@ -8,7 +8,7 @@ include "includes/header.php";
     <div id="map"></div>
 
 
-    <script src="includes/script/map.js" defer></script>
+    <script src="includes/script/map.js" defer></script> 
 
 
 <?php
