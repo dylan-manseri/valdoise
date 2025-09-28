@@ -36,7 +36,9 @@
 <head>
     <meta charset="utf-8">
     <title><?=$title?></title>
-    <link rel="stylesheet" href="<?=$style?>.css" />
+    <link rel="stylesheet" href="style/<?=$style?>.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
     <script src="script.js"></script>
 </head>
 <body>
