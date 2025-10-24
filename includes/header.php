@@ -108,6 +108,7 @@
         <nav class="main-nav" style="display: flex; align-items: center; justify-content: space-between;">
             <ul class="list-nav">
                 <li><a href="index.php">Accueil</a></li>
+                <li><a href="connexion.php">Connexion</a></li>
             </ul>
 
 		</nav>
