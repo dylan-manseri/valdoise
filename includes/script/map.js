@@ -8,6 +8,7 @@ let map = L.map('map', {
     maxBoundsViscosity: 1.0*/ // Effet rebondit quand on sort de la limite
 }).setView([49.0616, 2.1581], 10);
 
+L.DomUtil.get(map.getContainer()).style.background="white";
     // Fond de carte
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -55,4 +56,4 @@ fetch("https://public.opendatasoft.com/api/records/1.0/search/?dataset=georef-fr
         map.setMinZoom(map.getBoundsZoom(layer.getBounds()));
 });
 
-/*--------------------------FOND DE CARTE --------------------------*/
+/*--------------------------FOND DE CARTEEEEE --------------------------*/
