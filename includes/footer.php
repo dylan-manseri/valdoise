@@ -1,4 +1,4 @@
-    </main>
+   </main>
     <footer>
         <span>CY Paris Cergy Université - 2025</span>
         <span>
@@ -7,4 +7,4 @@
     </footer>
 
 </body>
-</html>
+</html>-
