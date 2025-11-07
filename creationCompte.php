@@ -2,6 +2,7 @@
 session_start();
 $dbFilePath = './mdp.json';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {  
+  $asupprimer = 2;
   $name = $_POST['name'] ?? null;
   $email = $_POST['email'] ?? null;
   $password = $_POST['password'] ?? null;
