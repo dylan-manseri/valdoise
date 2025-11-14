@@ -1,31 +1,75 @@
-<?php
+  <?php
 session_start();
 $dbFilePath = './mdp.json';
+
+// Inclusions de PHPMailer
+require 'vendor/autoload.php'; 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {  
-  $name = $_POST['name'] ?? null;
-  $email = $_POST['email'] ?? null;
-  $password = $_POST['password'] ?? null;
+    $name = $_POST['name'] ?? null;
+    $email = $_POST['email'] ?? null;
+    $password = $_POST['password'] ?? null;
 
-  if (empty($name) || empty($email) || empty($password)) { exit("All fields are required"); }
+    if (empty($name) || empty($email) || empty($password)) { exit("All fields are required"); }
 
-  $users = file_exists($dbFilePath) ? json_decode(file_get_contents($dbFilePath), true) : [];
-  foreach ($users as $user) {
-      if ($user['email'] === $email) {
-          http_response_code(409);
-          exit('User with this email already exists');
-      }
-  }
-  
-  $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-  $newUserId = uniqid('user_');
-  $newUser = ['id' => $newUserId, 'name' => $name, 'email' => $email, 'hashedPassword' => $hashedPassword];
-  $users[] = $newUser;
-  file_put_contents($dbFilePath, json_encode($users, JSON_PRETTY_PRINT), LOCK_EX);
-  $_SESSION['userId'] = $newUserId;
-  $_SESSION['name'] = $newUser['name'];
+    $users = file_exists($dbFilePath) ? json_decode(file_get_contents($dbFilePath), true) : [];
+    foreach ($users as $user) {
+        if ($user['email'] === $email) {
+            http_response_code(409);
+            exit('User with this email already exists');
+        }
+    }
+    
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    $newUserId = uniqid('user_');
+    $token = bin2hex(random_bytes(32)); 
+    
+    $newUser = [
+        'id' => $newUserId, 
+        'name' => $name, 
+        'email' => $email, 
+        'hashedPassword' => $hashedPassword,
+        'is_verified' => false,
+        'verification_token' => $token
+    ];
 
-  header('Location: /caMarche.html');
-  exit;
+    $users[] = $newUser;
+    
+    try {
+        file_put_contents($dbFilePath, json_encode($users, JSON_PRETTY_PRINT), LOCK_EX);
+        
+        // Envoi du mail
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.votreservice.com'; 
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'votre-email@votresite.com';
+        $mail->Password   = 'votre_mot_de_passe_email';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; 
+        $mail->Port       = 465; 
+        $mail->CharSet    = 'UTF-8';
+
+        $mail->setFrom('no-reply@votresite.com', 'Sortie Val d\'Oise');
+        $mail->addAddress($email, $name);
+        $mail->isHTML(true);
+        $mail->Subject = 'Confirmez votre inscription';
+        
+        $verificationLink = "https://votresite.com/verifier.php?token=" . $token; 
+        $mail->Body    = "<h2>Bienvenue, $name!</h2><p>Veuillez cliquer sur ce lien pour activer votre compte :</p><p><a href='$verificationLink'>Activer mon compte</a></p>";
+        $mail->AltBody = "Veuillez copier/coller ce lien pour activer votre compte : $verificationLink";
+
+        $mail->send();
+        
+        header('Location: /checkYourEmail.html'); 
+        exit;
+        
+    } catch (Exception $e) {
+        // En cas d'échec de l'envoi de mail ou de l'écriture du fichier
+        http_response_code(500);
+        exit("Erreur : L'inscription a échoué. " . $e->getMessage());
+    }
 }
 ?>
 
@@ -92,10 +136,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       opacity: 0.3;
     }
     .register-remark {
-      font-size: 0.8em;      /* Petite écriture */
-      color: #6c757d;       /* Couleur discrète (gris) */
-      margin-top: -10px;    /* Un peu moins d'espace en haut */
-      margin-bottom: 20px;  /* Espace avant le titre "Login" */
+      font-size: 0.8em; 
+      color: #6c757d; 
+      margin-top: -10px; 
+      margin-bottom: 20px; 
     }
 
     .register-container h2 {
@@ -107,25 +151,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     .sun-inline {
       position: absolute;
-      top: 17px;       
-      right: -35px;       
+      top: 17px; 
+      right: -35px; 
       width: 60px;
     }
     
     .sun-inline img {
       width: 100%;
     }
-    /* AJOUTEZ cette nouvelle règle CSS à la fin de votre balise <style> */
   .register-icon {
-    position: absolute;  /* Positionne l'image par rapport au .register-container */
-    bottom: 15px;        /* 15px du bord inférieur */
-    right: 430px;         /* 15px du bord droit */
-    width: 150px;         /* Ajustez la taille de l'image comme vous le souhaitez */
+    position: absolute; 
+    bottom: 15px; 
+    right: 430px; 
+    width: 150px; 
   }
   .paper-inline {
     position: absolute;
-    top: 120px;       
-    left: 490px;       
+    top: 120px; 
+    left: 490px; 
     width: 70px;
   }
     
@@ -170,11 +213,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     
-
-
-
-
-
   </style>
 </head>
 <body>
@@ -184,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </h2>
     <form action="/register" method="POST">
       <input type="text" name="name" placeholder="Nom + prenom" id="username-input" required>
-        <span id="username-error" style="color: red; font-size: 0.9em; height: 1em;"></span>      
+        <span id="username-error" style="color: red; font-size: 0.9em; height: 1em;"></span>     
       <input type="email" name="email" placeholder="Email" required>
       <input type="password" name="password" placeholder="Password" required>
       <button type="submit">register</button>
