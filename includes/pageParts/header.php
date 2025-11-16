@@ -36,8 +36,9 @@ $title="";
 <head>
     <meta charset="utf-8">
     <title><?=$title?></title>
-    <link rel="stylesheet" href="style/<?=$style?>.css" />
+    <link rel="stylesheet" href="style/<?=$style?>/<?=$style?>.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="style/<?=$style?>/navbar.css" />
 
     <script src="script.js"></script>
 </head>
@@ -105,20 +106,36 @@ $title="";
 </script>
 
 <header>
-    <nav class="main-nav" style="display: flex; align-items: center; justify-content: space-between;">
-        <ul class="list-nav">
-            <li><a href="index.php">Accueil</a></li>
-            <li><a href="connexion.php">Connexion</a></li>
+    <div class="logo">
+        <a href="index.php">
+            <img src="images/header/<?=$style?>/logo-nav.webp" alt="icone du site"/>
+        </a>
+    </div>
+    <nav>
+        <ul>
+            <li class="menu-deroulant">
+                <a href="index.php#accueil">Explorer ▾</a>
+                <div class="choice-list">
+                    <a href="search.php">
+                        <img src="images/header/<?=$style?>/search-text.webp" alt="icone de carte"/>
+                    </a>
+                    <a href="meteo.php">
+                        <img src="images/header/<?=$style?>/search-map.webp" alt="icone de carte"/>
+                    </a>
+                </div>
+            </li>
+            <li><a class="select-nav" href="carte.php">Carte</a></li>
+            <li><a class="select-nav" href="about.php">À propos</a></li>
         </ul>
-
     </nav>
-    <span style="position: fixed; bottom: 110px; right: 16px;">
-            <a href="?mode=<?=$bascule?>" aria-label="Changer le style"><img src="images/<?=$style?>.png" alt="Changer style" /></a>
-        </span>
-
-    <span>
-       		<a href="#" title="Retour en haut de page" class="back-to-top">↑</a>
-    	</span>
+    <div class="style-toggle">
+        <a class="select-nav-cookie" href="cookies.php">Cookies</a>
+        <?php if (!isset($_GET["style"]) || $_GET["style"] == "light"): ?>
+            <a href="?style=dark" class="dark-mode">🌙 Mode nuit</a>
+        <?php else: ?>
+            <a href="?style=light" class="light-mode">☀️ Mode jour</a>
+        <?php endif; ?>
+    </div>
 </header>
 
 <main>

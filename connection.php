@@ -212,7 +212,7 @@ $dbFilePath = './mdp.json';
       <input type="email" name="email" placeholder="Email" required>
       <input type="password" name="password" placeholder="Password" required>
       <button type="submit">Login</button>
-      <p style="font-size: 0.9em;">Vous n'avez pas de compte? <a href="creationCompte.php">inscrivez-vous </a></p>
+      <p style="font-size: 0.9em;">Vous n'avez pas de compte? <a href="newAccount.php">inscrivez-vous </a></p>
     </form>
 
   </div>

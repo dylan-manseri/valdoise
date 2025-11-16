@@ -34,9 +34,9 @@ fetch("https://public.opendatasoft.com/api/records/1.0/search/?dataset=georef-fr
     // Ajout du contour
 
     const layer = L.polygon(coords, {
-        color: "red",
+        stroke: false,
         fillOpacity: 0,
-        weight: 1
+        weight: 0
     }).addTo(map);
     map.fitBounds(layer.getBounds());
 
@@ -50,6 +50,7 @@ fetch("https://public.opendatasoft.com/api/records/1.0/search/?dataset=georef-fr
         const mask = L.polygon([world,coords], {
             fillColor: "white",
             fillOpacity: 1,
+            color: "#636363"
         }).addTo(map);
 
         map.setMaxBounds(layer.getBounds());

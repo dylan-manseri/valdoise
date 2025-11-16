@@ -1,0 +1,27 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#map{
+    position: absolute;
+    height: 90%;
+    width: 100%;
+}
+
+:root {
+    --primary-color: #2B2D42;
+    --secondary-color: #8D99AE;
+    --background-color: #ececec;
+    --text-color: #27272e;
+    --accent-color: #EF233C;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+a{
+    color: #1864ad;
+    display:block;
+    text-align: center;
+    margin: auto;
+}

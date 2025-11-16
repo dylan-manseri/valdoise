@@ -188,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input type="email" name="email" placeholder="Email" required>
       <input type="password" name="password" placeholder="Password" required>
       <button type="submit">register</button>
-      <p style="font-size: 0.9em;">Si vous avez déjà un compte, <a href="connexion.php">passez au login</a></p>
+      <p style="font-size: 0.9em;">Si vous avez déjà un compte, <a href="connection.php">passez au login</a></p>
     </form>
   </div>
 <script>
