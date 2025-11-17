@@ -57,4 +57,4 @@ fetch("https://public.opendatasoft.com/api/records/1.0/search/?dataset=georef-fr
         map.setMinZoom(map.getBoundsZoom(layer.getBounds()));
 });
 
-/*--------------------------FOND DE CARTEEEEE --------------------------*/
+/*--------------------------FOND DE CARTE --------------------------*/
