@@ -28,8 +28,6 @@ if ($cookieConsent === 'true' && isset($_COOKIE["date_last_visit"])) {
 // 5.bouton de bascule
 $bascule = ($style === "light") ? "dark" : "light";
 
-$title="";
-
 ?>
 <!doctype html>
 <html lang="fr">
@@ -39,8 +37,10 @@ $title="";
     <link rel="stylesheet" href="style/<?=$style?>/<?=$style?>.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="style/<?=$style?>/navbar.css" />
-
-    <script src="script.js"></script>
+    <link rel="stylesheet" href="style/<?=$style?>/<?=$css?>.css" />
+    <meta name="msvalidate.01" content="3EAE8332F257463B9D8DE1208375E37B" />
+    <meta name="google-site-verification" content="q-MMb7F1RGkafbyRqtY7RWspQVzYXJ4aCmvuIfNOxgs" />
+    <meta name="description" content="<?=$description?>" />
 </head>
 <body>
 <script>
@@ -137,7 +137,9 @@ $title="";
         <?php endif; ?>
     </div>
 </header>
-
+<?php if ($h1!=""):?>
+<h1> <?=$h1?> </h1>
+<?php endif;?>
 <main>
     <section id="cookie-banner" style="display: none; position: fixed; bottom: 0; left: 25px; width: 50%; background: #333; color: #fff; padding: 15px; text-align: center; z-index: 9999;">
         <h2 style="font-size: medium">Ce site utilise des cookies pour améliorer votre expérience.</h2>

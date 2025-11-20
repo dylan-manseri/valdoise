@@ -1,4 +1,8 @@
 <?php
+$h1="Carte des activités";
+$title="Carte des activités";
+$description="Les activité du Val-d'Oise affiché sur une carte.";
+$css="carte";
 include "includes/pageParts/header.php";
 ?>
 <!-- Import Leaflet -->
