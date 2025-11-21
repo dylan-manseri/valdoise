@@ -1,24 +1,123 @@
 <?php
 session_start();
-$dbFilePath = './mdp.json';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {  
+// Assurez-vous que bd_conf.php définit $pdo correctement
+require_once 'bd_conf.php';
+require_once 'email_conf.php';
 
-  $secretKey = '6LevZwwsAAAAAEW-nvjqE6s-f7dswt8OzcPIM1_V'; 
-  $recaptchaToken = $_POST['g-recaptcha-response'] ?? null;
+// --- CONFIGURATION PHPMailer ---
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-  if (!$recaptchaToken) {
-      http_response_code(400); 
-      exit('<h1>Veuillez cocher la case "Je ne suis pas un robot".</h1>');
-  }
+require 'PHPMailer-master/src/Exception.php';
+require 'PHPMailer-master/src/PHPMailer.php';
+require 'PHPMailer-master/src/SMTP.php';
 
 
-  $name = $_POST['name'] ?? null;
-  $email = $_POST['email'] ?? null;
-  $password = $_POST['password'] ?? null;
+// Fonction d'envoi d'e-mail utilisant PHPMailer
+function sendVerificationEmail($recipientEmail, $verificationCode, $smtpConfig) {
+    $mail = new PHPMailer(true);
+    try {
+        // Paramètres SMTP (À ADAPTER À VOTRE VRAI FOURNISSEUR)
+        $mail->isSMTP();
+        $mail->Host       = $smtpConfig['host']; 
+        $mail->SMTPAuth   = true;
+        // Utilisez de préférence un mot de passe d'application et non votre mot de passe principal
+        $mail->Username   = $smtpConfig['username']; 
+        $mail->Password   = $smtpConfig['password']; 
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port       = $smtpConfig['port'];
 
-  if (empty($name) || empty($email) || empty($password)) { exit("All fields are required"); }
+        // Expéditeur
+        $mail->setFrom($smtpConfig['username'], $smtpConfig['sender_name']);
+        // Destinataire
+        $mail->addAddress($recipientEmail);
 
-      $verifyURL = 'https://www.google.com/recaptcha/api/siteverify';
+        // Contenu
+        $mail->isHTML(true);
+        $mail->Subject = 'Votre code de verification pour Sortie Valdoise';
+        $mail->Body    = "<h1>Verification de votre compte</h1><p>Merci de votre inscription. Votre code de vérification est : <strong>{$verificationCode}</strong></p><p>Saisissez ce code sur la page de vérification pour activer votre compte.</p>";
+        $mail->AltBody = "Votre code de vérification est : {$verificationCode}";
+
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        // Log l'erreur d'envoi de mail, mais ne l'affiche pas directement à l'utilisateur
+        error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+        return false;
+    }
+}
+
+
+// VERIFICATION AJAX 
+if (isset($_GET['action']) && $_GET['action'] === 'check_username') {
+    header('Content-Type: application/json');
+    
+    $login = $_POST['login'] ?? ''; 
+
+    if (empty($login)) {
+        echo json_encode(['available' => false]);
+        exit;
+    }
+    
+    $isTaken = false; 
+    try {
+        // NOTE: On vérifie l'existence même si l'utilisateur est 'pending'
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE LOWER(login) = LOWER(?)");
+        $stmt->execute([$login]);
+        
+        if ($stmt->fetchColumn() > 0) {
+            $isTaken = true;
+        }
+
+    } catch (PDOException $e) {
+        error_log("DB Error during AJAX check: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['available' => false, 'error' => 'Erreur de base de données.']);
+        exit;
+    }
+    
+    echo json_encode(['available' => !$isTaken]);
+    exit;
+}
+
+
+// CREATION DE COMPTE 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $secretKey = '6LevZwwsAAAAAEW-nvjqE6s-f7dswt8OzcPIM1_V'; 
+    $recaptchaToken = $_POST['g-recaptcha-response'] ?? null;
+
+    if (!$recaptchaToken) {
+        http_response_code(400); 
+        exit('<h1>Erreur: Veuillez cocher la case "Je ne suis pas un robot".</h1>');
+    }
+
+    // Sanctuarisation des entrées
+    $login = trim($_POST['login'] ?? null);
+    $nom_user = trim($_POST['nom_user'] ?? null);
+    $prenom_user = trim($_POST['prenom_user'] ?? null);
+    $email = trim($_POST['email'] ?? null);
+    $password = $_POST['password'] ?? null; 
+
+
+    if (empty($login) || empty($nom_user) || empty($prenom_user) || empty($email) || empty($password)) { 
+        http_response_code(400); 
+        exit("Erreur: Tous les champs sont requis."); 
+    }
+    
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(400);
+        exit("Erreur: L'adresse e-mail n'est pas valide.");
+    }
+    
+    if (strlen($password) < 8) {
+        http_response_code(400);
+        exit("Erreur: Le mot de passe doit contenir au moins 8 caractères.");
+    }
+
+
+    // 2.2. VÉRIFICATION RECAPTCHA (Aucun changement)
+    $verifyURL = 'https://www.google.com/recaptcha/api/siteverify';
     $postData = http_build_query([
         'secret'   => $secretKey,
         'response' => $recaptchaToken,
@@ -36,34 +135,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $response = file_get_contents($verifyURL, false, $context);
     $result = json_decode($response);
 
-
     if (!$result || !$result->success) {
         http_response_code(401);
         exit('<h1>Échec de la vérification CAPTCHA. Vous êtes un robot ?</h1>');
     }
 
 
-  $users = file_exists($dbFilePath) ? json_decode(file_get_contents($dbFilePath), true) : [];
-  foreach ($users as $user) {
-      if ($user['email'] === $email) {
-          http_response_code(409);
-          exit('User with this email already exists');
-      }
-  }
-  
-  $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-  $newUserId = uniqid('user_');
-  $newUser = ['id' => $newUserId, 'name' => $name, 'email' => $email, 'hashedPassword' => $hashedPassword];
-  $users[] = $newUser;
-  file_put_contents($dbFilePath, json_encode($users, JSON_PRETTY_PRINT), LOCK_EX);
-  $_SESSION['userId'] = $newUserId;
-  $_SESSION['name'] = $newUser['name'];
+try {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE LOWER(login) = LOWER(?) OR email = ?");
+    $stmt->execute([$login, $email]);
+    if ($stmt->fetchColumn() > 0) {
+        http_response_code(409);
+        exit('Un utilisateur avec ce login ou cet e-mail existe déjà. Si votre compte est en attente, vérifiez vos spams.');
+    }
 
-  header('Location: /caMarche.html');
-  exit;
+    // PRÉ-ENREGISTREMENT ET ENVOI DU CODE
+    $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    
+    // Insertion du nouvel utilisateur dans la DB avec le code et le statut par default 'pending'
+    $stmt = $pdo->prepare("INSERT INTO users (login, nom_user, prenom_user, email, hashedPassword, code_genere) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$login, $nom_user, $prenom_user, $email, $hashedPassword, $verificationCode]);
+
+    // ENVOI DE L'E-MAIL
+    if (!sendVerificationEmail($email, $verificationCode, $smtpConfig)) {
+         // Si le mail échoue, supprimez l'utilisateur pour qu'il puisse réessayer
+         $pdo->prepare("DELETE FROM users WHERE email = ? AND status = 'pending'")->execute([$email]);
+         http_response_code(500);
+         exit('Erreur lors de l\'envoi de l\'e-mail de vérification. Veuillez réessayer.');
+    }
+    
+    // Préparation de la Session pour la prochaine étape
+    // On ne stocke que l'e-mail (identifiant) dans la session
+    $_SESSION['email_pending'] = $email;
+    
+    header('Location: verifCode.php');
+    exit;
+
+} catch (PDOException $e) {
+    http_response_code(500);
+    exit('Erreur de base de données lors de l\'enregistrement: ' . $e->getMessage());
+} catch (\Exception $e) {
+    http_response_code(500);
+    exit('Une erreur inattendue est survenue: ' . $e->getMessage());
+}
+
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -204,12 +322,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       animation-timing-function: ease-in-out;
     }
 
-    
-
-
-
-
-
   </style>
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
@@ -218,9 +330,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h2>
       Register
     </h2>
-    <form action="/register" method="POST">
-      <input type="text" name="name" placeholder="Nom + prenom" id="username-input" required>
+    <form action="" method="POST">
+      <input type="text" name="login" placeholder="Nom d'utilisateur (Login)" id="username-input" required>
         <span id="username-error" style="color: red; font-size: 0.9em; height: 1em;"></span>      
+      <input type="text" name="nom_user" placeholder="Votre nom" required>
+      <input type="text" name="prenom_user" placeholder="Votre prenom" required>
       <input type="email" name="email" placeholder="Email" required>
       <input type="password" name="password" placeholder="Password" required>
       <div class="g-recaptcha" data-sitekey="6LevZwwsAAAAAHJ6UbjViJZvzWHdhkgQqB4v2zHz"></div>
@@ -229,34 +343,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
   </div>
 <script>
-        const usernameInput = document.getElementById('username-input');
-        const errorMessageSpan = document.getElementById('username-error');
+  const usernameInput = document.getElementById('username-input');
+  const errorMessageSpan = document.getElementById('username-error');
+  let currentAbortController = null; // Pour annuler les requêtes précédentes
 
-        // This function runs every time you type in the username field
-        usernameInput.addEventListener('input', function() {
-            const username = usernameInput.value.trim();
+  // This function runs every time you type in the username field
+  usernameInput.addEventListener('input', function() {
+    const login = usernameInput.value.trim(); 
 
-            // Clear any previous message
-            errorMessageSpan.textContent = '';
+    // Clear any previous message
+    errorMessageSpan.textContent = '';
+      
+      // Annuler la requête précédente pour ne pas avoir de résultats en double
+    if (currentAbortController) { 
+        currentAbortController.abort(); 
+    }
+    currentAbortController = new AbortController(); 
+    const signal = currentAbortController.signal; 
 
-            // Only start checking after 3 characters
-            if (username.length >= 3) {
-                // Send the username to the PHP server to check if it's taken
-                fetch('/check-username', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `username=${encodeURIComponent(username)}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // 'data.available' comes from your PHP script
-                    if (!data.available) {
-                        errorMessageSpan.textContent = 'Ce nom d\'utilisateur est déjà utilisé.';
-                        usernameInput.value = '';
-                    }
-                })
-            }
-        });
-    </script>
-    </body>
+    // Only start checking after 3 characters
+    if (login.length >= 3) {
+      
+      // CIBLE CORRIGÉE : Pointe vers le même fichier avec l'action AJAX
+      fetch('creationCompte.php?action=check_username', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        // Nom de la variable 'login' qui est envoyée au PHP
+        body: `login=${encodeURIComponent(login)}`, 
+        signal: signal 
+      })
+      .then(response => {
+          if (!response.ok) throw new Error('Network response was not ok');
+          return response.json();
+      })
+      .then(data => {
+        if (signal.aborted) return; // Ignore si la requête a été annulée
+                  
+        // 'data.available' comes from your PHP script
+        if (!data.available) {
+          errorMessageSpan.textContent = 'Ce login est déjà utilisé.';
+          errorMessageSpan.style.color = 'red';
+        } else {
+          errorMessageSpan.textContent = 'Login disponible !';
+          errorMessageSpan.style.color = 'green';
+        }
+      })
+      .catch(error => {
+        if (error.name === 'AbortError') return; // C'est normal
+        console.error("Erreur de vérification AJAX:", error);
+        errorMessageSpan.textContent = 'Erreur lors de la vérification.';
+        errorMessageSpan.style.color = 'orange';
+      });
+    }
+  });
+</script>
+</body>
 </html>

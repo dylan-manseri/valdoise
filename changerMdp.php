@@ -1,34 +1,38 @@
 <?php
-require_once '../../.conf.php';
+require_once 'bd_conf.php';
 $token = $_GET['token'] ?? $_POST['token'] ?? null;
 $error = null;
 $success = null;
-
-
 $foundUser = null;
 
 if (!$token) {
-    die('Aucun jeton (token) fourni.');
-}
-
-try {
-    $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE reset_token = ?");
-    $stmt->execute([$token]);
-    $foundUser = $stmt->fetch();
-} catch (PDOException $e) {
-    die('Erreur de base de données. Veuillez réessayer.');
-}
-
-if ($foundUser === false) {
-    die('Jeton invalide.');
+    $error = 'Aucun jeton (token) fourni. Veuillez vérifier le lien.';
+} else {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE reset_token = ?");
+        $stmt->execute([$token]);
+        $foundUser = $stmt->fetch();
+    } catch (PDOException $e) {
+        // En cas d'erreur de base de données (ex: table non trouvée)
+        $error = 'Erreur de base de données. Veuillez réessayer.';
+    }
 }
 
 
-if ($foundUser['reset_expires'] < time()) {
-    die('Ce jeton a expiré. Veuillez en demander un nouveau.');
+if ($foundUser === false && !$error) {
+    $error = 'Jeton invalide ou déjà utilisé.';
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+if ($foundUser && !$error) {
+    if ($foundUser['reset_expires'] < time()) {
+        $error = 'Ce jeton a expiré. Veuillez en demander un nouveau.';
+        $pdo->prepare("UPDATE users SET reset_token = NULL, reset_expires = NULL WHERE login = ?")
+            ->execute([$foundUser['login']]);
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && $foundUser) {
     $password = $_POST['password'];
     $password_confirm = $_POST['password_confirm'];
 
@@ -38,17 +42,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         try {
             $stmt = $pdo->prepare(
-                "UPDATE utilisateurs 
+                "UPDATE users 
                  SET hashedPassword = ?, reset_token = NULL, reset_expires = NULL 
-                 WHERE id = ?"
+                 WHERE login = ?"
             );
-            $stmt->execute([$hashedPassword, $foundUser['id']]);
+            $stmt->execute([$hashedPassword, $foundUser['login']]);
 
+            $success = 'Votre mot de passe a été réinitialisé avec succès.';
+            header('Location: /connexion.php');
+            exit;
         } catch (PDOException $e) {
-            die('Erreur lors de la mise à jour du mot de passe.');
+            error_log("DB Error on password update: " . $e->getMessage());
+            $error = 'Erreur lors de la mise à jour du mot de passe.';
         }
-        header('Location: /connexion');
-        exit;
     }
 }
 
@@ -130,18 +136,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p style="color: green;"><?php echo $success; ?></p>
         <?php else: ?>
             
-            <?php if ($error): ?>
-                <p style="color: red;"><?php echo $error; ?></p>
-            <?php endif; ?>
+        <?php if ($error): ?>
+            <p style="color: red;"><?php echo $error; ?></p>
+        <?php endif; ?>
 
-            <!-- The HTML form action is correct, it posts to itself -->
-            <form action="reset-password.php" method="POST">
-                <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
-                
-                <input type="password" name="password" placeholder="Nouveau mot de passe" required>
-                <input type="password" name="password_confirm" placeholder="Confirmez le mot de passe" required>
-                <button type="submit">Enregistrer</button>
-            </form>
+        <!-- The HTML form action is correct, it posts to itself -->
+        <form action="" method="POST">
+            <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
+            
+            <input type="password" name="password" placeholder="Nouveau mot de passe" required>
+            <input type="password" name="password_confirm" placeholder="Confirmez le mot de passe" required>
+            <button type="submit">Enregistrer</button>
+        </form>
 
         <?php endif; ?>
 
