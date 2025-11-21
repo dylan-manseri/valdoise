@@ -1,0 +1,7 @@
+# robots.txt pour https://sortievaldoise.alwaysdata.net
+# Autorise tous les robots à crawler toutes les pages
+User-agent: *
+Disallow:
+
+# Indique l'emplacement du sitemap
+Sitemap: https://sortievaldoise.alwaysdata.net/sitemap.xml
