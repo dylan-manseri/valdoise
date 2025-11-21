@@ -10,7 +10,9 @@ include "includes/pageParts/header.php";
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <div id="map"></div>
 
+    <?php
 
+    ?>
     <script src="includes/script/map.js" defer></script>
     <script src="includes/script/pins.js" defer></script>
 <?php

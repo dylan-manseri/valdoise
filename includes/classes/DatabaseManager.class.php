@@ -1,5 +1,6 @@
 <?php
 
+namespace classes;
 require_once "User.class.php";
 
 class DatabaseManager
@@ -30,13 +31,13 @@ class DatabaseManager
 
     public function connection(): void
     {
-        try{
-            $dsn = 'mysql:host='.$this->hostname.';port='.$this->port.';dbname='.$this->dbname;
+        try {
+            $dsn = 'mysql:host=' . $this->hostname . ';port=' . $this->port . ';dbname=' . $this->dbname;
             $dbh = new PDO($dsn, $this->usernameDB, $this->password);
             $pdoStat = $dbh->query('SELECT * FROM accounts;');
             $tab = $pdoStat->fetchAll();
-            echo $tab[0][0].' '.$tab[0][1].' '.$tab[0][2].' '.$tab[0][3];
-        }catch(PDOException $e){
+            echo $tab[0][0] . ' ' . $tab[0][1] . ' ' . $tab[0][2] . ' ' . $tab[0][3];
+        } catch (PDOException $e) {
             echo 'Nous rencontrons actuellement un problème avec notre base de donnée';
         }
     }

@@ -1,1 +1,0 @@
-https://data.iledefrance.fr/api/explore/v2.1/catalog/datasets/evenements-publics-cibul/records?limit=100&refine=location_department%3A%22Val-d%27Oise%22&refine=firstdate_begin%3A
