@@ -1,5 +1,6 @@
 <?php
-require_once 'bd_conf.php';
+require_once 'conf/bd_conf.php';
+
 $token = $_GET['token'] ?? $_POST['token'] ?? null;
 $error = null;
 $success = null;

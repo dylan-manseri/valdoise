@@ -1,5 +1,5 @@
 <?php
-require_once 'bd_conf.php';
+require_once 'conf/bd_conf.php';
 session_start();
 
 $message = "";
