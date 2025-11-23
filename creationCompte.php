@@ -17,11 +17,11 @@ require 'PHPMailer-master/src/SMTP.php';
 function sendVerificationEmail($recipientEmail, $verificationCode, $smtpConfig) {
     $mail = new PHPMailer(true);
     try {
-        // Paramètres SMTP (À ADAPTER À VOTRE VRAI FOURNISSEUR)
+        // Paramètres SMTP
         $mail->isSMTP();
         $mail->Host       = $smtpConfig['host']; 
         $mail->SMTPAuth   = true;
-        // Utilisez de préférence un mot de passe d'application et non votre mot de passe principal
+
         $mail->Username   = $smtpConfig['username']; 
         $mail->Password   = $smtpConfig['password']; 
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
@@ -84,7 +84,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_username') {
 // CREATION DE COMPTE 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $secretKey = '6LevZwwsAAAAAEW-nvjqE6s-f7dswt8OzcPIM1_V'; 
+    $secretKey = '6LcQvhUsAAAAAHQeBp45mltCnq09pfLefqC63Vju'; 
     $recaptchaToken = $_POST['g-recaptcha-response'] ?? null;
 
     if (!$recaptchaToken) {
@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
 
-    // 2.2. VÉRIFICATION RECAPTCHA (Aucun changement)
+    // 2.2. VÉRIFICATION RECAPTCHA
     $verifyURL = 'https://www.google.com/recaptcha/api/siteverify';
     $postData = http_build_query([
         'secret'   => $secretKey,
@@ -337,7 +337,7 @@ try {
       <input type="text" name="prenom_user" placeholder="Votre prenom" required>
       <input type="email" name="email" placeholder="Email" required>
       <input type="password" name="password" placeholder="Password" required>
-      <div class="g-recaptcha" data-sitekey="6LevZwwsAAAAAHJ6UbjViJZvzWHdhkgQqB4v2zHz"></div>
+      <div class="g-recaptcha" data-sitekey="6LcQvhUsAAAAAA2KNnzztwaYceSB-TluyMsKwQTq"></div>
       <button type="submit">register</button>
       <p style="font-size: 0.9em;">Si vous avez déjà un compte, <a href="connexion.php">passez au login</a></p>
     </form>
