@@ -1,8 +1,8 @@
 <?php
 session_start();
 // Assurez-vous que bd_conf.php définit $pdo correctement
-require_once 'bd_conf.php';
-require_once 'email_conf.php';
+require_once 'conf/bd_conf.php';
+require_once 'conf/email_conf.php';
 
 // --- CONFIGURATION PHPMailer ---
 use PHPMailer\PHPMailer\PHPMailer;

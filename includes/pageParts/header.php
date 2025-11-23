@@ -125,7 +125,7 @@ $bascule = ($style === "light") ? "dark" : "light";
                 </div>
             </li>
             <li><a class="select-nav" href="carte.php">Carte</a></li>
-            <li><a class="select-nav" href="about.php">À propos</a></li>
+            <li><a class="select-nav" href="connexion.php">Mes activités</a></li>
         </ul>
     </nav>
     <div class="style-toggle">
