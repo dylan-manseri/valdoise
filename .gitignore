@@ -1,2 +1,5 @@
-bd_conf.php
-email_conf.php
+conf/bd_conf.php
+conf/email_conf.php
+connexion.php
+creationCompte.php
+composer.json
