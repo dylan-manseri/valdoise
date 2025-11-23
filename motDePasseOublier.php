@@ -1,6 +1,6 @@
 <?php
-require_once 'bd_conf.php';
-require_once 'email_conf.php';
+require_once 'conf/bd_conf.php';
+require_once 'conf/email_conf.php';
 
 
 use PHPMailer\PHPMailer\PHPMailer;

@@ -1,9 +1,9 @@
 <?php
-require_once 'bd_conf.php';
+require_once 'conf/bd_conf.php';
 session_start();
 
 $message = "";
-$code = trim($_POST['code'] ?? null);
+$code = trim((string)($_POST['code'] ?? ''));
 $email_pending = $_SESSION['email_pending'] ?? null;
 $foundUser = null;
 

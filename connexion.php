@@ -1,6 +1,7 @@
 <?php
 session_start();
-require_once 'bd_conf.php';
+require_once 'conf/bd_conf.php';
+require_once 'conf/captcha_conf.php';
 
 $errorMessage = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') { 
@@ -35,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit; 
     }
 
-    $secretKey = '6LevZwwsAAAAAEW-nvjqE6s-f7dswt8OzcPIM1_V'; 
     $recaptchaToken = $_POST['g-recaptcha-response'] ?? null;
 
     if (!$recaptchaToken) {
@@ -282,7 +282,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <ul id="suggestions"></ul>
       </div>
       <input type="password" name="password" placeholder="Mot de passe" required>
-      <div class="g-recaptcha" data-sitekey="6LevZwwsAAAAAHJ6UbjViJZvzWHdhkgQqB4v2zHz"></div>
+      <div class="g-recaptcha" data-sitekey=<?=$data_sitekey?>></div>
       <button type="submit">Login</button>
       <p style="font-size: 0.9em;">Vous n'avez pas de compte? <a href="creationCompte.php">inscrivez-vous </a></p>
       <a href="/motDePasseOublier.php">Mot de passe oublié ?</a>

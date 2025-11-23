@@ -3,6 +3,7 @@ session_start();
 // Assurez-vous que bd_conf.php définit $pdo correctement
 require_once 'conf/bd_conf.php';
 require_once 'conf/email_conf.php';
+require_once 'conf/captcha_conf.php';
 
 // --- CONFIGURATION PHPMailer ---
 use PHPMailer\PHPMailer\PHPMailer;
@@ -17,11 +18,11 @@ require 'PHPMailer-master/src/SMTP.php';
 function sendVerificationEmail($recipientEmail, $verificationCode, $smtpConfig) {
     $mail = new PHPMailer(true);
     try {
-        // Paramètres SMTP (À ADAPTER À VOTRE VRAI FOURNISSEUR)
+        // Paramètres SMTP
         $mail->isSMTP();
         $mail->Host       = $smtpConfig['host']; 
         $mail->SMTPAuth   = true;
-        // Utilisez de préférence un mot de passe d'application et non votre mot de passe principal
+
         $mail->Username   = $smtpConfig['username']; 
         $mail->Password   = $smtpConfig['password']; 
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
@@ -84,7 +85,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_username') {
 // CREATION DE COMPTE 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $secretKey = '6LevZwwsAAAAAEW-nvjqE6s-f7dswt8OzcPIM1_V'; 
     $recaptchaToken = $_POST['g-recaptcha-response'] ?? null;
 
     if (!$recaptchaToken) {
@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
 
-    // 2.2. VÉRIFICATION RECAPTCHA (Aucun changement)
+    // 2.2. VÉRIFICATION RECAPTCHA
     $verifyURL = 'https://www.google.com/recaptcha/api/siteverify';
     $postData = http_build_query([
         'secret'   => $secretKey,
@@ -331,13 +331,13 @@ try {
       Register
     </h2>
     <form action="" method="POST">
-      <input type="text" name="login" placeholder="Nom d'utilisateur (Login)" id="username-input" required>
+      <input type="text" name="login" placeholder="Nom d'utilisateur (Login)" id="username-input" maxlength="12" required>
         <span id="username-error" style="color: red; font-size: 0.9em; height: 1em;"></span>      
-      <input type="text" name="nom_user" placeholder="Votre nom" required>
-      <input type="text" name="prenom_user" placeholder="Votre prenom" required>
-      <input type="email" name="email" placeholder="Email" required>
+      <input type="text" name="nom_user" placeholder="Votre nom" maxlength="30" required>
+      <input type="text" name="prenom_user" placeholder="Votre prenom" maxlength="30" required>
+      <input type="email" name="email" placeholder="Email" maxlength="50" required>
       <input type="password" name="password" placeholder="Password" required>
-      <div class="g-recaptcha" data-sitekey="6LevZwwsAAAAAHJ6UbjViJZvzWHdhkgQqB4v2zHz"></div>
+      <div class="g-recaptcha" data-sitekey=<?=$data_sitekey?>></div>
       <button type="submit">register</button>
       <p style="font-size: 0.9em;">Si vous avez déjà un compte, <a href="connexion.php">passez au login</a></p>
     </form>
