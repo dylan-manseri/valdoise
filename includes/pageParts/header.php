@@ -38,12 +38,17 @@ $bascule = ($style === "light") ? "dark" : "light";
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="style/<?=$style?>/navbar.css" />
     <link rel="stylesheet" href="style/<?=$style?>/<?=$css?>.css" />
+    <meta name="robots" content="index, follow">
     <meta name="msvalidate.01" content="3EAE8332F257463B9D8DE1208375E37B" />
     <meta name="google-site-verification" content="q-MMb7F1RGkafbyRqtY7RWspQVzYXJ4aCmvuIfNOxgs" />
     <meta name="description" content="<?=$description?>" />
 </head>
 <body>
 <script>
+    // Skip cookie banner for search engine crawlers
+    if (navigator.userAgent.match(/bot|crawl|spider|bing|google/i)) {
+        document.getElementById('cookie-banner').style.display = 'none';
+    }
     function setCookie(name, value, days) {
         let expires = "";
         if (days) {
@@ -125,6 +130,7 @@ $bascule = ($style === "light") ? "dark" : "light";
                 </div>
             </li>
             <li><a class="select-nav" href="carte.php">Carte</a></li>
+            <li><a class="select-nav" href="sorties.php">Sorties</a></li>
             <li><a class="select-nav" href="connexion.php">Mes activités</a></li>
         </ul>
     </nav>
