@@ -1,78 +1,133 @@
 <?php
 session_start();
+require_once 'conf/bd_conf.php';
+
 if (!isset($_SESSION['login'])) {
-    header("Location: login.php");
+    header('Location: /index.php');
     exit;
 }
-require_once 'conf/bd_conf.php';
-$stmt = $pdo->prepare("SELECT nom_user, prenom_user, login FROM users WHERE login = ?");
-$stmt->execute([$_SESSION['login']]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
-?>
 
+$login = $_SESSION['login'];
+
+$stmt = $pdo->prepare("SELECT login, nom_user, prenom_user, email FROM users WHERE login = ?");
+$stmt->execute([$login]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$hist = $pdo->prepare("SELECT description, date_sortie FROM historique WHERE user_login = ?");
+$hist->execute([$login]);
+$historique = $hist->fetchAll(PDO::FETCH_ASSOC);
+
+$fav = $pdo->prepare("SELECT titre, categorie FROM favoris WHERE user_login = ?");
+$fav->execute([$login]);
+$favoris = $fav->fetchAll(PDO::FETCH_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mon Profil</title>
+<meta charset="UTF-8">
+<title>Profil</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
 <style>
-body {
-  font-family: 'Permanent Marker', cursive; 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #e7e8bc;
-  margin: 0;
+body{
+    margin:0;
+    background:#e7e8bc;
+    font-family:'Permanent Marker',cursive;
 }
-.profil-container {
-  background-color: #f4f4d7;
-  padding: 30px 40px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  text-align: center;
-  width: 350px;
+.container{
+    max-width:800px;
+    margin:50px auto;
+    background:#f4f4d7;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
 }
-.profil-container h2 {
-  margin-bottom: 20px;
-  font-size: 2rem;
-  color: #333;
+h1{
+    font-size:2.2rem;
+    margin-bottom:20px;
 }
-.profil-container p {
-  font-size: 1rem;
-  margin: 10px 0;
+.section{
+    margin-top:30px;
+    background:#fff;
+    padding:20px;
+    border-radius:8px;
 }
-.profil-container button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 15px;
-  background-color: #7e9ad7;
-  color: white;
-  font-size: 1rem;
-  font-family: 'Permanent Marker', cursive; 
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.5s;
+.section h2{
+    font-size:1.7rem;
+    margin-bottom:15px;
 }
-.profil-container button:hover {
-  background-color: #7789b1;
-  opacity: 0.3;
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:1rem;
+}
+table td,table th{
+    padding:10px;
+    border-bottom:1px solid #ddd;
+}
+.logout{
+    display:inline-block;
+    margin-top:20px;
+    padding:10px 20px;
+    background:#7e9ad7;
+    color:#fff;
+    text-decoration:none;
+    border-radius:5px;
+}
+.logout:hover{
+    opacity:0.3;
 }
 </style>
 </head>
 <body>
-<div class="profil-container">
-<h2>Mon Profil</h2>
+<div class="container">
+<h1>Profil</h1>
 
-<p><strong>Nom :</strong> <?= htmlspecialchars($user['nom_user']) ?></p>
-<p><strong>Prénom :</strong> <?= htmlspecialchars($user['prenom_user']) ?></p>
-<p><strong>Login :</strong> <?= htmlspecialchars($user['login']) ?></p>
+<div class="section">
+<h2>Informations</h2>
+<table>
+<tr><th>Nom</th><td><?=htmlspecialchars($user['nom_user'])?></td></tr>
+<tr><th>Prénom</th><td><?=htmlspecialchars($user['prenom_user'])?></td></tr>
+<tr><th>Login</th><td><?=htmlspecialchars($user['login'])?></td></tr>
+<tr><th>Email</th><td><?=htmlspecialchars($user['email'])?></td></tr>
+</table>
+</div>
 
-<form action="logout.php" method="POST">
-<button type="submit">Déconnexion</button>
-</form>
+<div class="section">
+<h2>Historique</h2>
+<?php if(empty($historique)): ?>
+<p>Aucun historique disponible.</p>
+<?php else: ?>
+<table>
+<tr><th>Description</th><th>Date</th></tr>
+<?php foreach($historique as $h): ?>
+<tr>
+<td><?=htmlspecialchars($h['description'])?></td>
+<td><?=htmlspecialchars($h['date_sortie'])?></td>
+</tr>
+<?php endforeach; ?>
+</table>
+<?php endif; ?>
+</div>
+
+<div class="section">
+<h2>Favoris</h2>
+<?php if(empty($favoris)): ?>
+<p>Aucun favori enregistré.</p>
+<?php else: ?>
+<table>
+<tr><th>Titre</th><th>Catégorie</th></tr>
+<?php foreach($favoris as $f): ?>
+<tr>
+<td><?=htmlspecialchars($f['titre'])?></td>
+<td><?=htmlspecialchars($f['categorie'])?></td>
+</tr>
+<?php endforeach; ?>
+</table>
+<?php endif; ?>
+</div>
+
+<a class="logout" href="logout.php">Déconnexion</a>
 </div>
 </body>
 </html>
