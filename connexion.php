@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['login'] = $foundUser['login'];
         $_SESSION['name'] = $foundUser['nom_user'];
         $_SESSION['pren'] = $foundUser['prenom_user'];
-        header('Location: /SortieValdOise-1/profil.php');
+       header('Location: /profil.php');
         exit;
     } else {
         $errorMessage = 'Login ou mot de passe incorrect.';
