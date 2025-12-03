@@ -1,7 +1,8 @@
 <?php
+
 //clé de l'api
 $apiKey = "808e208d9b9144a289e3655652d24d0f";
-//  3 agendas
+//  3 agendas : à revoir
 $agendaIds = ['56500817', '90134339', '2624769'];
 
 //
@@ -25,6 +26,7 @@ function chargerAgenda($id, $key) {
     $data = json_decode($result, true);
     return $data['events'] ?? [];
 }
+
 
 // recup de la data
 $tousLesEvenements = [];
@@ -127,7 +129,7 @@ sort($villesDispo);
             
             <div class="infos">
                 <h2 style="margin:0 0 10px 0;">
-                    <a href="detail.php?uid=<?= $evt['uid'] ?>" style="text-decoration:none; color:#333;">
+                    <a href="detail_evenement.php?uid=<?= $evt['uid'] ?>" style="text-decoration:none; color:#333;">
                         <?= htmlspecialchars($evt['titre']) ?>
                     </a>
                 </h2>
