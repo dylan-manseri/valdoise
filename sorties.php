@@ -1,8 +1,7 @@
 <?php
-
 //clé de l'api
 $apiKey = "808e208d9b9144a289e3655652d24d0f";
-//  3 agendas : à revoir
+//  3 agendas
 $agendaIds = ['56500817', '90134339', '2624769'];
 
 //
@@ -26,7 +25,6 @@ function chargerAgenda($id, $key) {
     $data = json_decode($result, true);
     return $data['events'] ?? [];
 }
-
 
 // recup de la data
 $tousLesEvenements = [];
