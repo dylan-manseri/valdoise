@@ -1,26 +1,28 @@
 <?php
-$h1="Sorties Val-d'Oise";
+$title="Activités dans le Val-d'Oise";
+$h1="Liste d'activités";
 $css = "sortie";
-$description="ici plein de choses intéressantes!";
+$description="Liste d'activités dans le Val-d'Oise";
 include "includes/fonctions/activities.php";
 include "includes/pageParts/header.php";
 ?>
 
     <section class="main-container">
-        <form style="background:#f4f4f4; padding:15px; margin-bottom:20px; border-radius:5px;">
-            <label>
+        <div style="display: flex; gap: 5px; text-align: center; justify-content: center;">
+            <div style="display:flex; flex-direction: column;">
+                <label for="searchInput">Indiquez des mots clés</label>
+                <div class="search">
+                    <span class="search-icon material-symbols-outlined">search</span>
+                    <input id="searchInput" class="search-input" type="search" placeholder="Rechercher">
+                </div>
+            </div>
+            <div class="select-container">
+                <label for="cities">Sélectionner une ville</label>
                 <select id="cities">
                     <option value="">-- Ville --</option>
                 </select>
-            </label>
-            <button type="submit">Filtrer</button>
-        </form>
-        <form>
-            <div class="search">
-                <span class="search-icon material-symbols-outlined">search</span>
-            <input id="searchInput" class="search-input" type="search" placeholder="Rechercher">
             </div>
-        </form>
+        </div>
         <div id="results" style="padding-top: 10px;">
 
         </div>

@@ -9,8 +9,26 @@
 
 include "../includes/fonctions/activities.php";
 header('Content-Type: application/json');   // On définit la structure de la page (json)
-try {
-    echo json_encode(getActivities());      // On écrit en json le tableau d'activité construit au préalable.
-} catch (DateMalformedStringException $e) {
-    echo "Erreur de formation de la date";
+
+$cacheFile = "../cache/activities.json";
+
+$cacheDuration = 24 * 3600;
+if(file_exists($cacheFile)){
+    $age = time() - filemtime($cacheFile);
+    if($age < $cacheDuration){
+        echo file_get_contents($cacheFile);
+    }
 }
+else{
+    $activities = null;
+    try {
+        $activities = json_encode(getActivities()); // On écrit en json le tableau d'activité construit au préalable.
+    } catch (DateMalformedStringException $e) {
+
+    }
+
+    file_put_contents($cacheFile, $activities);
+    echo $activities;
+}
+
+

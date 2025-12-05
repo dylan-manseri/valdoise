@@ -38,6 +38,7 @@ $bascule = ($style === "light") ? "dark" : "light";
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="style/<?=$style?>/navbar.css" />
     <link rel="stylesheet" href="style/<?=$style?>/<?=$css?>.css" />
+    <link rel="stylesheet" href="style/<?=$style?>/footer.css" />
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=search" />
     <meta name="robots" content="index, follow">
@@ -123,16 +124,14 @@ $bascule = ($style === "light") ? "dark" : "light";
             <li class="menu-deroulant">
                 <a href="index.php#accueil">Explorer ▾</a>
                 <div class="choice-list">
-                    <a href="search.php">
-                        <img src="images/header/<?=$style?>/search-text.webp" alt="icone de carte"/>
-                    </a>
-                    <a href="meteo.php">
+                    <a href="carte.php">
                         <img src="images/header/<?=$style?>/search-map.webp" alt="icone de carte"/>
+                    </a>
+                    <a href="sorties.php">
+                        <img src="images/header/<?=$style?>/search-text.webp" alt="icone de carte"/>
                     </a>
                 </div>
             </li>
-            <li><a class="select-nav" href="carte.php">Carte</a></li>
-            <li><a class="select-nav" href="sorties.php">Sorties</a></li>
             <li><a class="select-nav" href="connexion.php">Mes activités</a></li>
         </ul>
     </nav>

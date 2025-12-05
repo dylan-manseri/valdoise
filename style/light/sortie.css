@@ -1,5 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Lora:wght@400;700&family=Playfair+Display:wght@400;700&display=swap');
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* corps = hauteur de l’écran */
+}
+
 h1{
     text-align: center;
+    padding: 30px;
+    font-size: 45px;
 }
 
 body {
@@ -40,6 +54,7 @@ body {
 }
 
 .search{
+    height: 40px;
     --padding: 14px;
 
     width: max-content;
@@ -69,4 +84,57 @@ body {
 .search-input::placeholder,
 .search-icon{
     color: rgba(0,0,0,0.5);
+}
+
+select {
+    width:100px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.select-container select {
+    width: 100%;
+    padding: 10px 40px 10px 12px;   /* espace pour la flèche */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 15px;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.25s ease;
+}
+
+.select-container select:focus {
+    border-color: #4A90E2;
+    outline: none;
+}
+
+.select-container {
+    position: relative;
+}
+
+.select-container::after {
+    content: "▾";
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 14px;
+    color: #555;
+}
+
+.select-container select:hover {
+    border-color: #999;
+}
+
+.card-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .35s ease;
+}
+
+.card-panel.open {
+    max-height: 500px; /* une valeur assez grande */
 }

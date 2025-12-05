@@ -118,17 +118,8 @@ fetch("data/activitiesJson.php")
     .then(data => {
         let i=0;
         Object.entries(data).forEach(([title, value]) => {
-            if(!Array.isArray(value)){
-                insertPin(value['lat'],value['lng'], value['title']);
-            }
-            else{
-                value.forEach(e => {                                    // Cas où une activité a plusieurs fois le même nom
-                    insertPin(e['lat'],e['lng'], e['title']);
-                })
-            }
-            i++;
+            insertPin(value['lat'],value['lng'], value['title']);
         })
-        console.log(i);
     })
 
 

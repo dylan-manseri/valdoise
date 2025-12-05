@@ -15,6 +15,5 @@ include "includes/pageParts/header.php";
     ?>
     <script src="includes/script/map.js" defer></script>
     <script src="includes/script/pins.js" defer></script>
-<?php
-include "includes/pageParts/footer.php"
-?>
+</body>
+</html>

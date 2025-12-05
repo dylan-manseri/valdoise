@@ -9,7 +9,7 @@ function display(eventsList){
         card.innerHTML = `
             <div style="width:150px; height:120px; background:#ccc;"><img src="${event.image}" alt="illustration"/></div>
             <div class="infos">
-                <h2 style="margin:0 0 10px 0;">
+                <h2 style="margin:0 0 10px 0;font-family: 'Playfair Display', serif;">
                     <a href="detail_evenement.php?uid=${event.uid}" style="text-decoration:none; color:#333;">
                         ${event.title}
                     </a>
@@ -57,10 +57,6 @@ fetch("data/activitiesJson.php")
             const term = searchInput.value.toLowerCase().trim();
             let i = 0
             const filtered = eventsArray.filter(ev => {
-                const firstValue = Object.values(ev)?.[0];
-                if(Array.isArray(firstValue)){
-
-                }
                 const title = (ev.title ?? "").toLowerCase();
                 const keywordMatch = Array.isArray(ev.keywords)
                     ? ev.keywords.some(kw => kw.toLowerCase().includes(term))
@@ -75,5 +71,16 @@ fetch("data/activitiesJson.php")
             });
             display(filtered);
         });
+
+        selectCities.addEventListener("change", () => {
+            if(selectCities.value !== "" && searchInput.value === ""){
+                const actByCity = eventsArray.filter(ev => {
+                    if(ev.ville){
+                        return ev.ville.includes(selectCities.value);
+                    }
+                })
+                display(actByCity);
+            }
+        })
         display(eventsArray);
     })
