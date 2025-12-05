@@ -45,7 +45,7 @@ $stmt->execute([$login]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
-$fav = $pdo->prepare("SELECT titre, categorie FROM favoris WHERE user_login = ?");
+$fav = $pdo->prepare("SELECT id_favoris, id_sortie FROM favoris WHERE user_login = ?");
 $fav->execute([$login]);
 $favoris = $fav->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -115,7 +115,7 @@ table td,table th{
 <header>
     <div class="logo">
         <a href="index.php">
-            <img src="images/header/<?=$style?>/logo-nav.webp" alt="icone du site"/>
+            <img src="images/header/logo_sv.png" alt="icone du site"/>
         </a>
     </div>
     <nav>
