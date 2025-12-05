@@ -2,6 +2,38 @@
 session_start();
 require_once 'conf/bd_conf.php';
 
+
+// Consentement cookies
+$cookieConsent = isset($_COOKIE['cookieConsent']) ? $_COOKIE['cookieConsent'] : null;
+
+// Valeur par défaut
+$style = "light";
+
+//1. Si l'utilisateur met mode= dans l'URL : on l'utilise
+if (isset($_GET["mode"]) && in_array($_GET["mode"], ["light", "dark"], true)) {
+    $style = $_GET["mode"];
+
+    // 2. On le stocke en cookie uniquement si consentement accepté
+    if ($cookieConsent === 'true') {
+        setcookie("style", $style, time() + 60*60*24*30, "/"); // 30 jours
+    }
+}
+// 3. Sinon, si consentement accepté : lire le cookie "style" s'il est valide
+elseif ($cookieConsent === 'true' && isset($_COOKIE['style']) && in_array($_COOKIE['style'], ['light', 'dark'], true)) {
+    $style = $_COOKIE['style'];
+}
+
+// 4.Cookie date dernière visite
+if ($cookieConsent === 'true' && isset($_COOKIE["date_last_visit"])) {
+    $date = $_COOKIE["date_last_visit"];
+    setcookie("date_last_visit", time(), time() + 60*60*24*30, "/");
+}
+
+// 5.bouton de bascule
+$bascule = ($style === "light") ? "dark" : "light";
+
+
+
 if (!isset($_SESSION['login'])) {
     header('Location: /index.php');
     exit;
@@ -27,12 +59,15 @@ $favoris = $fav->fetchAll(PDO::FETCH_ASSOC);
 <meta charset="UTF-8">
 <title>Profil</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="index, follow">
+<meta name="msvalidate.01" content="3EAE8332F257463B9D8DE1208375E37B" />
+<meta name="google-site-verification" content="q-MMb7F1RGkafbyRqtY7RWspQVzYXJ4aCmvuIfNOxgs" />
 <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style/<?=$style?>/navbar.css" />
 <style>
 body{
     margin:0;
     background:#e7e8bc;
-    font-family:'Permanent Marker',cursive;
 }
 .container{
     max-width:800px;
@@ -80,6 +115,41 @@ table td,table th{
 </style>
 </head>
 <body>
+
+<header>
+    <div class="logo">
+        <a href="index.php">
+            <img src="images/header/<?=$style?>/logo-nav.webp" alt="icone du site"/>
+        </a>
+    </div>
+    <nav>
+        <ul>
+            <li class="menu-deroulant">
+                <a href="index.php#accueil">Explorer ▾</a>
+                <div class="choice-list">
+                    <a href="search.php">
+                        <img src="images/header/<?=$style?>/search-text.webp" alt="icone de carte"/>
+                    </a>
+                    <a href="meteo.php">
+                        <img src="images/header/<?=$style?>/search-map.webp" alt="icone de carte"/>
+                    </a>
+                </div>
+            </li>
+            <li><a class="select-nav" href="carte.php">Carte</a></li>
+            <li><a class="select-nav" href="sorties.php">Sorties</a></li>
+            <li><a class="select-nav" href="connexion.php">Mes activités</a></li>
+        </ul>
+    </nav>
+    <div class="style-toggle">
+        <a class="select-nav-cookie" href="cookies.php">Cookies</a>
+        <?php if (!isset($_GET["style"]) || $_GET["style"] == "light"): ?>
+            <a href="?style=dark" class="dark-mode">🌙 Mode nuit</a>
+        <?php else: ?>
+            <a href="?style=light" class="light-mode">☀️ Mode jour</a>
+        <?php endif; ?>
+    </div>
+</header>
+
 <div class="container">
 <h1>Profil</h1>
 

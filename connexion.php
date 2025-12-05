@@ -107,7 +107,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title>Page Login</title>
   <style>
     body {
-      font-family: 'Permanent Marker', cursive; 
       display: flex;
       justify-content: center;
       align-items: center;
@@ -136,7 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       padding: 10px;
       margin: 10px 0;
       font-size: 1rem;
-      font-family: 'Permanent Marker', cursive; 
       border: 1px solid #ccc;
       border-radius: 5px;
     }
@@ -149,7 +147,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       background-color: #7e9ad7;
       color: white;
       font-size: 1rem;
-      font-family: 'Permanent Marker', cursive; 
       border: none;
       border-radius: 5px;
       cursor: pointer;
