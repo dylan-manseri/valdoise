@@ -38,6 +38,8 @@ $bascule = ($style === "light") ? "dark" : "light";
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="style/<?=$style?>/navbar.css" />
     <link rel="stylesheet" href="style/<?=$style?>/<?=$css?>.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=search" />
     <meta name="robots" content="index, follow">
     <meta name="msvalidate.01" content="3EAE8332F257463B9D8DE1208375E37B" />
     <meta name="google-site-verification" content="q-MMb7F1RGkafbyRqtY7RWspQVzYXJ4aCmvuIfNOxgs" />

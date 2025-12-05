@@ -7,6 +7,9 @@
  * Date : 23/11/2025
  */
 
+ini_set("log_errors", 1);
+ini_set("error_log", "C:/wamp64/www/debug.log");
+
 /**
  * Construit un tableau associatif des principales information de l'événement selon OpenAgendaAPI
  * @param $event l'évènement tel qu'il nous est donné dans l'API
@@ -15,6 +18,7 @@
 function buildArrayOpenAgenda($event) : array
 {
     $infos['uid'] = $event['uid'];
+    $infos['ville'] = $event['location']['city'] ?? null;
     $infos['source'] = 'OpenAgendaAPI';
     $infos['lat'] = $event['location']['latitude'];
     $infos['lng'] = $event['location']['longitude'];
@@ -175,6 +179,7 @@ function getActivitiesOpenAgenda(&$activities): void
  */
 function buildArrayDataIDF($event): array
 {
+    $infos['ville'] = $event['location_city'] ?? null;
     $infos['uid'] = $event['uid'];
     $infos['sources'] = 'DataIleDeFranceAPI';
     $infos['lat'] = $event['location_coordinates']['lat'];
@@ -244,4 +249,24 @@ function getActivities(): array
     getActivitiesOpenAgenda($activities);   // Attention, passage par adresse.
     getActivitiesDataIDF($activities);
     return $activities;
+}
+
+/**
+ * Renvoie toutes les villes des activités sous forme d'un select
+ * @return string : le select
+ */
+function getAllCities(): string
+{
+    $json = file_get_contents("https://sortievaldoise.alwaysdata.net/data/activitiesJson.php");
+    $data = json_decode($json, true);
+    $select = "<select name='cities' id='cities'>";
+
+    foreach($data as $event){
+        if (isset($event['ville'])) $city[$event['ville']] = $event['ville'];
+    }
+    foreach($city as $c){
+        $select .= "<option value='".$c."'>".$c."</option>";
+    }
+    $select .= "</select>";
+    return $select;
 }
