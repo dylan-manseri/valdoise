@@ -115,7 +115,7 @@ table td,table th{
 <header>
     <div class="logo">
         <a href="index.php">
-            <img src="images/header/logo_sv.png" alt="icone du site"/>
+            <img src="images/logo_sv.png" alt="icone du site"/>
         </a>
     </div>
     <nav>
