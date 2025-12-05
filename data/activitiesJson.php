@@ -1,16 +1,35 @@
 <?php
 /**
  * Fichier : activitiesJson.php
- * Description :    Fichier stockant les activités récupéré (cf. fonctions/activities.php).
- *                  L'intérêt est de pouvoir les manipuler via js, sans avoir à réaliser de multiples requête navigateur.
- * Auteur : Dylan Manseri
- * Date : 23/11/2025
+ * Description : Récupération des activités pour JSON.
  */
 
 include "../includes/fonctions/activities.php";
-header('Content-Type: application/json');   // On définit la structure de la page (json)
+header('Content-Type: application/json');
+
 try {
-    echo json_encode(getActivities());      // On écrit en json le tableau d'activité construit au préalable.
-} catch (DateMalformedStringException $e) {
-    echo "Erreur de formation de la date";
+    $activities = getActivities();
+
+    // Vérifier que $activities est un tableau
+    if (!is_array($activities)) {
+        $activities = []; // vide si problème
+    }
+
+    // Générer un ID unique pour chaque sortie si ce n'est pas déjà défini
+    foreach ($activities as &$activity) {
+        if (!isset($activity['id'])) {
+            $activity['id'] = uniqid();
+        }
+        // Assurer que titre et description existent pour éviter les warnings
+        if (!isset($activity['titre'])) $activity['titre'] = '';
+        if (!isset($activity['description'])) $activity['description'] = '';
+        if (!isset($activity['categorie'])) $activity['categorie'] = '';
+    }
+    unset($activity);
+
+    echo json_encode($activities);
+
+} catch (Exception $e) {
+    // Si getActivities plante, renvoyer un tableau vide JSON
+    echo json_encode([]);
 }

@@ -2,21 +2,19 @@
 session_start();
 require_once 'conf/bd_conf.php';
 
-$cookieConsent = isset($_COOKIE['cookieConsent']) ? $_COOKIE['cookieConsent'] : null;
-
+$cookieConsent = $_COOKIE['cookieConsent'] ?? null;
 $style = "light";
 
-if (isset($_GET["mode"]) && in_array($_GET["mode"], ["light", "dark"], true)) {
+if (isset($_GET["mode"]) && in_array($_GET["mode"], ["light","dark"], true)) {
     $style = $_GET["mode"];
     if ($cookieConsent === 'true') {
-        setcookie("style", $style, time() + 60*60*24*30, "/"); // 30 jours
+        setcookie("style", $style, time() + 60*60*24*30, "/");
     }
-} elseif ($cookieConsent === 'true' && isset($_COOKIE['style']) && in_array($_COOKIE['style'], ['light', 'dark'], true)) {
+} elseif ($cookieConsent === 'true' && isset($_COOKIE['style']) && in_array($_COOKIE['style'], ['light','dark'], true)) {
     $style = $_COOKIE['style'];
 }
 
 if ($cookieConsent === 'true' && isset($_COOKIE["date_last_visit"])) {
-    $date = $_COOKIE["date_last_visit"];
     setcookie("date_last_visit", time(), time() + 60*60*24*30, "/");
 }
 
@@ -29,11 +27,19 @@ if (!isset($_SESSION['login'])) {
 
 $login = $_SESSION['login'];
 
+// Récupérer infos utilisateur
 $stmt = $pdo->prepare("SELECT login, nom_user, prenom_user, email FROM users WHERE login = ?");
 $stmt->execute([$login]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$fav = $pdo->prepare("SELECT id_favoris, id_sortie FROM favoris WHERE user_login = ?");
+// Récupérer favoris avec jointure sur propositions
+$fav = $pdo->prepare("
+    SELECT p.titre AS titre, p.status AS categorie
+    FROM favoris f
+    LEFT JOIN propositions p ON f.id_sortie = p.id_prop
+    WHERE f.user_login = ?
+    ORDER BY f.id_favoris DESC
+");
 $fav->execute([$login]);
 $favoris = $fav->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -42,93 +48,29 @@ $favoris = $fav->fetchAll(PDO::FETCH_ASSOC);
 <head>
 <meta charset="UTF-8">
 <title>Profil</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="index, follow">
-<meta name="msvalidate.01" content="3EAE8332F257463B9D8DE1208375E37B" />
-<meta name="google-site-verification" content="q-MMb7F1RGkafbyRqtY7RWspQVzYXJ4aCmvuIfNOxgs" />
-<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style/<?=$style?>/navbar.css" />
 <style>
-body{
-    margin:0;
-    background:#e7e8bc;
-}
-.container{
-    max-width:800px;
-    margin:50px auto;
-    background:#f4f4d7;
-    padding:30px;
-    border-radius:10px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.2);
-}
-h1{
-    font-size:2.2rem;
-    margin-bottom:20px;
-}
-.gold-gradient {
-    text-align: center;                  
-    font-size: 2.2rem;                   
-    font-weight: bold;
-    background: linear-gradient(90deg, #b8860b, #ffdf00, #b8860b);  /* Dégradé doré */
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: block;
-    margin: 20px 0;
-}
-.section{
-    margin-top:30px;
-    background:#fff;
-    padding:20px;
-    border-radius:8px;
-}
-.section h2{
-    font-size:1.7rem;
-    margin-bottom:15px;
-}
-table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:1rem;
-}
-table td,table th{
-    padding:10px;
-    border-bottom:1px solid #ddd;
-}
-.logout{
-    display:inline-block;
-    margin-top:20px;
-    padding:10px 20px;
-    background:#7e9ad7;
-    color:#fff;
-    text-decoration:none;
-    border-radius:5px;
-}
-.logout:hover{
-    opacity:0.3;
-}
+body{margin:0;background:#e7e8bc}
+.container{max-width:800px;margin:50px auto;background:#f4f4d7;padding:30px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.2)}
+h1{font-size:2.2rem;margin-bottom:20px}
+.gold-gradient{text-align:center;font-size:2.2rem;font-weight:bold;background:linear-gradient(90deg,#b8860b,#ffdf00,#b8860b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;margin:20px 0}
+.section{margin-top:30px;background:#fff;padding:20px;border-radius:8px}
+.section h2{font-size:1.7rem;margin-bottom:15px}
+table{width:100%;border-collapse:collapse;font-size:1rem}
+table td,table th{padding:10px;border-bottom:1px solid #ddd}
+.logout{display:inline-block;margin-top:20px;padding:10px 20px;background:#7e9ad7;color:#fff;text-decoration:none;border-radius:5px;border:none;cursor:pointer}
+.logout:hover{opacity:0.3}
+form{margin-top:15px}
 </style>
 </head>
 <body>
 
 <header>
     <div class="logo">
-        <a href="index.php">
-            <img src="images/logo_sv.png" alt="icone du site"/>
-        </a>
+        <a href="index.php"><img src="images/logo_sv.png" alt="icone du site"/></a>
     </div>
     <nav>
         <ul>
-            <li class="menu-deroulant">
-                <a href="index.php#accueil">Explorer ▾</a>
-                <div class="choice-list">
-                    <a href="search.php">
-                        <img src="images/header/<?=$style?>/search-text.webp" alt="icone de carte"/>
-                    </a>
-                    <a href="meteo.php">
-                        <img src="images/header/<?=$style?>/search-map.webp" alt="icone de carte"/>
-                    </a>
-                </div>
-            </li>
             <li><a class="select-nav" href="carte.php">Carte</a></li>
             <li><a class="select-nav" href="sorties.php">Sorties</a></li>
             <li><a class="select-nav" href="connexion.php">Mes activités</a></li>
@@ -153,11 +95,17 @@ table td,table th{
 <div class="section">
 <h2>Informations</h2>
 <table>
-<tr><th>Nom</th><td><?= htmlspecialchars($user['nom_user']) ?></td></tr>
-<tr><th>Prénom</th><td><?= htmlspecialchars($user['prenom_user']) ?></td></tr>
-<tr><th>Login</th><td><?= htmlspecialchars($user['login']) ?></td></tr>
-<tr><th>Email</th><td><?= htmlspecialchars($user['email']) ?></td></tr>
+<tr><th>Nom</th><td><?= htmlspecialchars($user['nom_user'] ?? '') ?></td></tr>
+<tr><th>Prénom</th><td><?= htmlspecialchars($user['prenom_user'] ?? '') ?></td></tr>
+<tr><th>Login</th><td><?= htmlspecialchars($user['login'] ?? '') ?></td></tr>
+<tr><th>Email</th><td><?= htmlspecialchars($user['email'] ?? '') ?></td></tr>
 </table>
+<form action="modifier_profil.php" method="get">
+    <button type="submit" class="logout">Modifier les informations</button>
+</form>
+<form action="supprimer_compte.php" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer votre compte ? Cette action est irréversible.')">
+    <button type="submit" class="logout" style="background:#d9534f;">Supprimer le compte</button>
+</form>
 </div>
 
 <div class="section">
@@ -169,8 +117,8 @@ table td,table th{
 <tr><th>Titre</th><th>Catégorie</th></tr>
 <?php foreach ($favoris as $f): ?>
 <tr>
-<td><?= htmlspecialchars($f['titre']) ?></td>
-<td><?= htmlspecialchars($f['categorie']) ?></td>
+<td><?= htmlspecialchars($f['titre'] ?? 'Non défini') ?></td>
+<td><?= htmlspecialchars($f['categorie'] ?? 'Non défini') ?></td>
 </tr>
 <?php endforeach; ?>
 </table>
