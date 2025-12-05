@@ -9,14 +9,12 @@ if (!isset($_SESSION['login'])) {
 
 $login = $_SESSION['login'];
 
+/* --- Requête utilisateur --- */
 $stmt = $pdo->prepare("SELECT login, nom_user, prenom_user, email FROM users WHERE login = ?");
 $stmt->execute([$login]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$hist = $pdo->prepare("SELECT description, date_sortie FROM historique WHERE user_login = ?");
-$hist->execute([$login]);
-$historique = $hist->fetchAll(PDO::FETCH_ASSOC);
-
+/* --- Requête favoris --- */
 $fav = $pdo->prepare("SELECT titre, categorie FROM favoris WHERE user_login = ?");
 $fav->execute([$login]);
 $favoris = $fav->fetchAll(PDO::FETCH_ASSOC);
@@ -86,41 +84,24 @@ table td,table th{
 <div class="section">
 <h2>Informations</h2>
 <table>
-<tr><th>Nom</th><td><?=htmlspecialchars($user['nom_user'])?></td></tr>
-<tr><th>Prénom</th><td><?=htmlspecialchars($user['prenom_user'])?></td></tr>
-<tr><th>Login</th><td><?=htmlspecialchars($user['login'])?></td></tr>
-<tr><th>Email</th><td><?=htmlspecialchars($user['email'])?></td></tr>
+<tr><th>Nom</th><td><?= htmlspecialchars($user['nom_user']) ?></td></tr>
+<tr><th>Prénom</th><td><?= htmlspecialchars($user['prenom_user']) ?></td></tr>
+<tr><th>Login</th><td><?= htmlspecialchars($user['login']) ?></td></tr>
+<tr><th>Email</th><td><?= htmlspecialchars($user['email']) ?></td></tr>
 </table>
-</div>
-
-<div class="section">
-<h2>Historique</h2>
-<?php if(empty($historique)): ?>
-<p>Aucun historique disponible.</p>
-<?php else: ?>
-<table>
-<tr><th>Description</th><th>Date</th></tr>
-<?php foreach($historique as $h): ?>
-<tr>
-<td><?=htmlspecialchars($h['description'])?></td>
-<td><?=htmlspecialchars($h['date_sortie'])?></td>
-</tr>
-<?php endforeach; ?>
-</table>
-<?php endif; ?>
 </div>
 
 <div class="section">
 <h2>Favoris</h2>
-<?php if(empty($favoris)): ?>
+<?php if (empty($favoris)): ?>
 <p>Aucun favori enregistré.</p>
 <?php else: ?>
 <table>
 <tr><th>Titre</th><th>Catégorie</th></tr>
-<?php foreach($favoris as $f): ?>
+<?php foreach ($favoris as $f): ?>
 <tr>
-<td><?=htmlspecialchars($f['titre'])?></td>
-<td><?=htmlspecialchars($f['categorie'])?></td>
+<td><?= htmlspecialchars($f['titre']) ?></td>
+<td><?= htmlspecialchars($f['categorie']) ?></td>
 </tr>
 <?php endforeach; ?>
 </table>
