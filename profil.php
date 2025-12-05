@@ -2,27 +2,18 @@
 session_start();
 require_once 'conf/bd_conf.php';
 
-
-
 $cookieConsent = isset($_COOKIE['cookieConsent']) ? $_COOKIE['cookieConsent'] : null;
-
 
 $style = "light";
 
-
 if (isset($_GET["mode"]) && in_array($_GET["mode"], ["light", "dark"], true)) {
     $style = $_GET["mode"];
-
-    
     if ($cookieConsent === 'true') {
         setcookie("style", $style, time() + 60*60*24*30, "/"); // 30 jours
     }
-}
-
-elseif ($cookieConsent === 'true' && isset($_COOKIE['style']) && in_array($_COOKIE['style'], ['light', 'dark'], true)) {
+} elseif ($cookieConsent === 'true' && isset($_COOKIE['style']) && in_array($_COOKIE['style'], ['light', 'dark'], true)) {
     $style = $_COOKIE['style'];
 }
-
 
 if ($cookieConsent === 'true' && isset($_COOKIE["date_last_visit"])) {
     $date = $_COOKIE["date_last_visit"];
@@ -30,8 +21,6 @@ if ($cookieConsent === 'true' && isset($_COOKIE["date_last_visit"])) {
 }
 
 $bascule = ($style === "light") ? "dark" : "light";
-
-
 
 if (!isset($_SESSION['login'])) {
     header('Location: /index.php');
@@ -43,7 +32,6 @@ $login = $_SESSION['login'];
 $stmt = $pdo->prepare("SELECT login, nom_user, prenom_user, email FROM users WHERE login = ?");
 $stmt->execute([$login]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
 
 $fav = $pdo->prepare("SELECT id_favoris, id_sortie FROM favoris WHERE user_login = ?");
 $fav->execute([$login]);
@@ -76,6 +64,16 @@ body{
 h1{
     font-size:2.2rem;
     margin-bottom:20px;
+}
+.gold-gradient {
+    text-align: center;                  
+    font-size: 2.2rem;                   
+    font-weight: bold;
+    background: linear-gradient(90deg, #b8860b, #ffdf00, #b8860b);  /* Dégradé doré */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: block;
+    margin: 20px 0;
 }
 .section{
     margin-top:30px;
@@ -148,6 +146,9 @@ table td,table th{
 
 <div class="container">
 <h1>Profil</h1>
+<h2 class="gold-gradient">
+    Bienvenue <?= htmlspecialchars($user['prenom_user'] . " " . $user['nom_user']) ?>
+</h2>
 
 <div class="section">
 <h2>Informations</h2>
