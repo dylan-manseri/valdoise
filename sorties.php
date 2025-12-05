@@ -26,8 +26,6 @@ include "includes/pageParts/header.php";
         </div>
     </section>
 
-
-
 <?php include "includes/pageParts/footer.php" ?>
 <script src="includes/script/activitiesList.js" defer></script>
 

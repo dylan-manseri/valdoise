@@ -115,7 +115,7 @@ $bascule = ($style === "light") ? "dark" : "light";
 <header>
     <div class="logo">
         <a href="index.php">
-            <img src="images/header/<?=$style?>/logo-nav.webp" alt="icone du site"/>
+            <img src="images/logo_sv.png" alt="icone du site"/>
         </a>
     </div>
     <nav>

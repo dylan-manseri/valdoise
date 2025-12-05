@@ -248,7 +248,17 @@ function getActivities(): array
     $activities = array();
     getActivitiesOpenAgenda($activities);   // Attention, passage par adresse.
     getActivitiesDataIDF($activities);
-    return $activities;
+    foreach($activities as $i => $value){
+        if(is_array(reset($activities[$i]))){
+            foreach($activities[$i] as $j => $value2){
+                $result[$activities[$i][$j]["uid"]] = $activities[$i][$j];
+            }
+        }
+        else{
+            $result[$activities[$i]["uid"]] = $activities[$i];
+        }
+    }
+    return $result;
 }
 
 /**

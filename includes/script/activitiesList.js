@@ -55,7 +55,12 @@ fetch("data/activitiesJson.php")
             }
             document.createElement("div").innerHTML="";
             const term = searchInput.value.toLowerCase().trim();
+            let i = 0
             const filtered = eventsArray.filter(ev => {
+                const firstValue = Object.values(ev)?.[0];
+                if(Array.isArray(firstValue)){
+
+                }
                 const title = (ev.title ?? "").toLowerCase();
                 const keywordMatch = Array.isArray(ev.keywords)
                     ? ev.keywords.some(kw => kw.toLowerCase().includes(term))
