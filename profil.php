@@ -3,33 +3,32 @@ session_start();
 require_once 'conf/bd_conf.php';
 
 
-// Consentement cookies
+
 $cookieConsent = isset($_COOKIE['cookieConsent']) ? $_COOKIE['cookieConsent'] : null;
 
-// Valeur par défaut
+
 $style = "light";
 
-//1. Si l'utilisateur met mode= dans l'URL : on l'utilise
+
 if (isset($_GET["mode"]) && in_array($_GET["mode"], ["light", "dark"], true)) {
     $style = $_GET["mode"];
 
-    // 2. On le stocke en cookie uniquement si consentement accepté
+    
     if ($cookieConsent === 'true') {
         setcookie("style", $style, time() + 60*60*24*30, "/"); // 30 jours
     }
 }
-// 3. Sinon, si consentement accepté : lire le cookie "style" s'il est valide
+
 elseif ($cookieConsent === 'true' && isset($_COOKIE['style']) && in_array($_COOKIE['style'], ['light', 'dark'], true)) {
     $style = $_COOKIE['style'];
 }
 
-// 4.Cookie date dernière visite
+
 if ($cookieConsent === 'true' && isset($_COOKIE["date_last_visit"])) {
     $date = $_COOKIE["date_last_visit"];
     setcookie("date_last_visit", time(), time() + 60*60*24*30, "/");
 }
 
-// 5.bouton de bascule
 $bascule = ($style === "light") ? "dark" : "light";
 
 
@@ -41,12 +40,11 @@ if (!isset($_SESSION['login'])) {
 
 $login = $_SESSION['login'];
 
-/* --- Requête utilisateur --- */
 $stmt = $pdo->prepare("SELECT login, nom_user, prenom_user, email FROM users WHERE login = ?");
 $stmt->execute([$login]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-/* --- Requête favoris --- */
+
 $fav = $pdo->prepare("SELECT titre, categorie FROM favoris WHERE user_login = ?");
 $fav->execute([$login]);
 $favoris = $fav->fetchAll(PDO::FETCH_ASSOC);
