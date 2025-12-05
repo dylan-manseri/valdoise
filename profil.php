@@ -2,6 +2,26 @@
 session_start();
 require_once 'conf/bd_conf.php';
 
+$cookieConsent = isset($_COOKIE['cookieConsent']) ? $_COOKIE['cookieConsent'] : null;
+
+$style = "light";
+
+if (isset($_GET["mode"]) && in_array($_GET["mode"], ["light", "dark"], true)) {
+    $style = $_GET["mode"];
+    if ($cookieConsent === 'true') {
+        setcookie("style", $style, time() + 60*60*24*30, "/"); // 30 jours
+    }
+} elseif ($cookieConsent === 'true' && isset($_COOKIE['style']) && in_array($_COOKIE['style'], ['light', 'dark'], true)) {
+    $style = $_COOKIE['style'];
+}
+
+if ($cookieConsent === 'true' && isset($_COOKIE["date_last_visit"])) {
+    $date = $_COOKIE["date_last_visit"];
+    setcookie("date_last_visit", time(), time() + 60*60*24*30, "/");
+}
+
+$bascule = ($style === "light") ? "dark" : "light";
+
 if (!isset($_SESSION['login'])) {
     header('Location: /index.php');
     exit;
@@ -13,11 +33,7 @@ $stmt = $pdo->prepare("SELECT login, nom_user, prenom_user, email FROM users WHE
 $stmt->execute([$login]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$hist = $pdo->prepare("SELECT description, date_sortie FROM historique WHERE user_login = ?");
-$hist->execute([$login]);
-$historique = $hist->fetchAll(PDO::FETCH_ASSOC);
-
-$fav = $pdo->prepare("SELECT titre, categorie FROM favoris WHERE user_login = ?");
+$fav = $pdo->prepare("SELECT id_favoris, id_sortie FROM favoris WHERE user_login = ?");
 $fav->execute([$login]);
 $favoris = $fav->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -27,12 +43,15 @@ $favoris = $fav->fetchAll(PDO::FETCH_ASSOC);
 <meta charset="UTF-8">
 <title>Profil</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="index, follow">
+<meta name="msvalidate.01" content="3EAE8332F257463B9D8DE1208375E37B" />
+<meta name="google-site-verification" content="q-MMb7F1RGkafbyRqtY7RWspQVzYXJ4aCmvuIfNOxgs" />
 <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style/<?=$style?>/navbar.css" />
 <style>
 body{
     margin:0;
     background:#e7e8bc;
-    font-family:'Permanent Marker',cursive;
 }
 .container{
     max-width:800px;
@@ -45,6 +64,16 @@ body{
 h1{
     font-size:2.2rem;
     margin-bottom:20px;
+}
+.gold-gradient {
+    text-align: center;                  
+    font-size: 2.2rem;                   
+    font-weight: bold;
+    background: linear-gradient(90deg, #b8860b, #ffdf00, #b8860b);  /* Dégradé doré */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: block;
+    margin: 20px 0;
 }
 .section{
     margin-top:30px;
@@ -80,47 +109,68 @@ table td,table th{
 </style>
 </head>
 <body>
+
+<header>
+    <div class="logo">
+        <a href="index.php">
+            <img src="images/logo_sv.png" alt="icone du site"/>
+        </a>
+    </div>
+    <nav>
+        <ul>
+            <li class="menu-deroulant">
+                <a href="index.php#accueil">Explorer ▾</a>
+                <div class="choice-list">
+                    <a href="search.php">
+                        <img src="images/header/<?=$style?>/search-text.webp" alt="icone de carte"/>
+                    </a>
+                    <a href="meteo.php">
+                        <img src="images/header/<?=$style?>/search-map.webp" alt="icone de carte"/>
+                    </a>
+                </div>
+            </li>
+            <li><a class="select-nav" href="carte.php">Carte</a></li>
+            <li><a class="select-nav" href="sorties.php">Sorties</a></li>
+            <li><a class="select-nav" href="connexion.php">Mes activités</a></li>
+        </ul>
+    </nav>
+    <div class="style-toggle">
+        <a class="select-nav-cookie" href="cookies.php">Cookies</a>
+        <?php if (!isset($_GET["style"]) || $_GET["style"] == "light"): ?>
+            <a href="?style=dark" class="dark-mode">🌙 Mode nuit</a>
+        <?php else: ?>
+            <a href="?style=light" class="light-mode">☀️ Mode jour</a>
+        <?php endif; ?>
+    </div>
+</header>
+
 <div class="container">
 <h1>Profil</h1>
+<h2 class="gold-gradient">
+    Bienvenue <?= htmlspecialchars($user['prenom_user'] . " " . $user['nom_user']) ?>
+</h2>
 
 <div class="section">
 <h2>Informations</h2>
 <table>
-<tr><th>Nom</th><td><?=htmlspecialchars($user['nom_user'])?></td></tr>
-<tr><th>Prénom</th><td><?=htmlspecialchars($user['prenom_user'])?></td></tr>
-<tr><th>Login</th><td><?=htmlspecialchars($user['login'])?></td></tr>
-<tr><th>Email</th><td><?=htmlspecialchars($user['email'])?></td></tr>
+<tr><th>Nom</th><td><?= htmlspecialchars($user['nom_user']) ?></td></tr>
+<tr><th>Prénom</th><td><?= htmlspecialchars($user['prenom_user']) ?></td></tr>
+<tr><th>Login</th><td><?= htmlspecialchars($user['login']) ?></td></tr>
+<tr><th>Email</th><td><?= htmlspecialchars($user['email']) ?></td></tr>
 </table>
-</div>
-
-<div class="section">
-<h2>Historique</h2>
-<?php if(empty($historique)): ?>
-<p>Aucun historique disponible.</p>
-<?php else: ?>
-<table>
-<tr><th>Description</th><th>Date</th></tr>
-<?php foreach($historique as $h): ?>
-<tr>
-<td><?=htmlspecialchars($h['description'])?></td>
-<td><?=htmlspecialchars($h['date_sortie'])?></td>
-</tr>
-<?php endforeach; ?>
-</table>
-<?php endif; ?>
 </div>
 
 <div class="section">
 <h2>Favoris</h2>
-<?php if(empty($favoris)): ?>
+<?php if (empty($favoris)): ?>
 <p>Aucun favori enregistré.</p>
 <?php else: ?>
 <table>
 <tr><th>Titre</th><th>Catégorie</th></tr>
-<?php foreach($favoris as $f): ?>
+<?php foreach ($favoris as $f): ?>
 <tr>
-<td><?=htmlspecialchars($f['titre'])?></td>
-<td><?=htmlspecialchars($f['categorie'])?></td>
+<td><?= htmlspecialchars($f['titre']) ?></td>
+<td><?= htmlspecialchars($f['categorie']) ?></td>
 </tr>
 <?php endforeach; ?>
 </table>
