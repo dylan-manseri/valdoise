@@ -1,14 +1,10 @@
-// Liste des favoris depuis PHP
-// Assurez-vous que sorties.php contient :
-// <script>const userFavorites = <?= json_encode($userFavorites) ?>;</script>
-
 const citiesSelect = document.getElementById("cities");
 const searchInput = document.getElementById("searchInput");
 const resultsDiv = document.getElementById("results");
 const cities = {};
 
 function display(eventsList){
-    resultsDiv.innerHTML="";
+    resultsDiv.innerHTML = "";
     eventsList.forEach(event => {
         const card = document.createElement("div");
         card.classList.add("card");
@@ -18,7 +14,7 @@ function display(eventsList){
                 <img src="${event.image}" alt="illustration" style="width:100%; height:100%; object-fit:cover;"/>
             </div>
             <div class="infos">
-                <h2 style="margin:0 0 10px 0;">
+                <h2 style="margin:0 0 10px 0;font-family: 'Playfair Display', serif;">
                     <a href="detail_evenement.php?uid=${event.uid}" style="text-decoration:none; color:#333;">
                         ${event.title}
                     </a>
@@ -34,7 +30,6 @@ function display(eventsList){
             </div>
         `;
 
-        // Bouton favoris
         const favBtn = document.createElement("button");
         favBtn.className = "favorite-btn";
         favBtn.dataset.id = event.uid;
@@ -70,13 +65,11 @@ function toggleFavorite(btn){
     });
 }
 
-// Récupération des activités
 fetch("data/activitiesJson.php")
     .then(response => response.json())
     .then(data => {
         const eventsArray = Object.values(data);
 
-        // Remplir le select villes
         eventsArray.forEach(event => {
             if(event.ville) cities[event.ville] = event.ville;
         });
@@ -87,10 +80,29 @@ fetch("data/activitiesJson.php")
             citiesSelect.appendChild(option);
         });
 
-        // Recherche en temps réel
-        searchInput.addEventListener("input", () => {
+        function filter() {
             const term = searchInput.value.toLowerCase().trim();
+            const city = citiesSelect.value;
+
             const filtered = eventsArray.filter(ev => {
                 const title = (ev.title ?? "").toLowerCase();
                 const keywordMatch = Array.isArray(ev.keywords)
-                    ?
+                    ? ev.keywords.some(kw => kw.toLowerCase().includes(term))
+                    : false;
+
+                let cityMatch = true;
+                if(city !== ""){
+                    cityMatch = ev.ville && ev.ville.includes(city);
+                }
+
+                return (title.includes(term) || keywordMatch) && cityMatch;
+            });
+
+            display(filtered);
+        }
+
+        searchInput.addEventListener("input", filter);
+        citiesSelect.addEventListener("change", filter);
+
+        display(eventsArray);
+    });

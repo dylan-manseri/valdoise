@@ -1,15 +1,18 @@
 <?php
 session_start();
-$h1="Sorties Val-d'Oise";
+
+$title = "Activités dans le Val-d'Oise";
+$h1 = "Liste d'activités";
 $css = "sortie";
-$description="ici plein de choses intéressantes!";
+$description = "Liste d'activités dans le Val-d'Oise";
+
 include "includes/fonctions/activities.php";
 include "includes/pageParts/header.php";
 
 // Connexion à la base
 require_once 'conf/bd_conf.php';
 
-// Récupérer les favoris de l'utilisateur
+// Récupérer les favoris
 $login = $_SESSION['login'] ?? null;
 $userFavorites = [];
 if ($login) {
@@ -20,21 +23,29 @@ if ($login) {
 ?>
 
 <section class="main-container">
-    <form style="background:#f4f4f4; padding:15px; margin-bottom:20px; border-radius:5px;">
-        <label>
+
+    <!-- Recherche + sélecteur ville -->
+    <div style="display: flex; gap: 5px; text-align: center; justify-content: center;">
+        
+        <div style="display:flex; flex-direction: column;">
+            <label for="searchInput">Indiquez des mots clés</label>
+            <div class="search">
+                <span class="search-icon material-symbols-outlined">search</span>
+                <input id="searchInput" class="search-input" type="search" placeholder="Rechercher">
+            </div>
+        </div>
+
+        <div class="select-container">
+            <label for="cities">Sélectionner une ville</label>
             <select id="cities">
                 <option value="">-- Ville --</option>
             </select>
-        </label>
-        <button type="submit">Filtrer</button>
-    </form>
-    <form>
-        <div class="search">
-            <span class="search-icon material-symbols-outlined">search</span>
-            <input id="searchInput" class="search-input" type="search" placeholder="Rechercher">
         </div>
-    </form>
-    <div id="results" style="padding-top: 10px;"></div>
+
+    </div>
+
+    <!-- Résultats -->
+    <div id="results" style="padding-top:10px;"></div>
 </section>
 
 <?php include "includes/pageParts/footer.php"; ?>
@@ -65,16 +76,20 @@ if ($login) {
 </style>
 
 <script>
-// Liste des favoris depuis PHP
+// Favoris depuis PHP
 const userFavorites = <?= json_encode($userFavorites) ?>;
 
+// DOM
 const citiesSelect = document.getElementById("cities");
 const searchInput = document.getElementById("searchInput");
 const resultsDiv = document.getElementById("results");
+
 const cities = {};
 
-function display(eventsList){
-    resultsDiv.innerHTML="";
+// Affichage
+function display(eventsList) {
+    resultsDiv.innerHTML = "";
+
     eventsList.forEach(event => {
         const card = document.createElement("div");
         card.classList.add("card");
@@ -100,20 +115,22 @@ function display(eventsList){
             </div>
         `;
 
-        // Ajouter le bouton favoris
+        // Bouton favoris
         const favBtn = document.createElement("button");
         favBtn.className = "favorite-btn";
         favBtn.dataset.id = event.uid;
         favBtn.textContent = userFavorites.includes(event.uid) ? "❤️" : "♡";
+        
         favBtn.addEventListener("click", () => toggleFavorite(favBtn));
         card.appendChild(favBtn);
 
         resultsDiv.appendChild(card);
-    })
+    });
 }
 
-function toggleFavorite(btn){
+function toggleFavorite(btn) {
     const id = btn.dataset.id;
+
     fetch("toggleFavorite.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -123,28 +140,28 @@ function toggleFavorite(btn){
     .then(data => {
         if(data.success){
             btn.textContent = data.isFavorite ? "❤️" : "♡";
+
             if(data.isFavorite){
                 if(!userFavorites.includes(id)) userFavorites.push(id);
             } else {
                 const index = userFavorites.indexOf(id);
                 if(index > -1) userFavorites.splice(index,1);
             }
-        } else {
-            alert("Erreur lors de la mise à jour des favoris");
         }
     });
 }
 
-// Récupérer les données depuis activitiesJson.php
+// Chargement JSON
 fetch("data/activitiesJson.php")
     .then(response => response.json())
     .then(data => {
         const eventsArray = Object.values(data);
 
-        // Remplir le select villes
+        // Remplir les villes
         eventsArray.forEach(event => {
             if(event.ville) cities[event.ville] = event.ville;
         });
+
         Object.values(cities).forEach(c => {
             const option = document.createElement("option");
             option.value = c;
@@ -152,41 +169,32 @@ fetch("data/activitiesJson.php")
             citiesSelect.appendChild(option);
         });
 
-        // Recherche en temps réel
-        searchInput.addEventListener("input", () => {
+        // Recherche + filtre ville
+        function filter() {
             const term = searchInput.value.toLowerCase().trim();
+            const city = citiesSelect.value;
+
             const filtered = eventsArray.filter(ev => {
                 const title = (ev.title ?? "").toLowerCase();
                 const keywordMatch = Array.isArray(ev.keywords)
                     ? ev.keywords.some(kw => kw.toLowerCase().includes(term))
                     : false;
-                let cityTest = true;
-                if(citiesSelect.value !== ""){
-                    if(ev.ville) cityTest = ev.ville.includes(citiesSelect.value);
-                }
-                return (title.includes(term) || keywordMatch) && cityTest;
-            });
-            display(filtered);
-        });
+                let cityMatch = true;
 
-        // Filtrage par ville
-        citiesSelect.addEventListener("change", () => {
-            const term = searchInput.value.toLowerCase().trim();
-            const filtered = eventsArray.filter(ev => {
-                const title = (ev.title ?? "").toLowerCase();
-                const keywordMatch = Array.isArray(ev.keywords)
-                    ? ev.keywords.some(kw => kw.toLowerCase().includes(term))
-                    : false;
-                let cityTest = true;
-                if(citiesSelect.value !== ""){
-                    if(ev.ville) cityTest = ev.ville.includes(citiesSelect.value);
+                if(city !== ""){
+                    cityMatch = ev.ville && ev.ville.includes(city);
                 }
-                return (title.includes(term) || keywordMatch) && cityTest;
-            });
-            display(filtered);
-        });
 
-        // Afficher toutes les activités au chargement
+                return (title.includes(term) || keywordMatch) && cityMatch;
+            });
+
+            display(filtered);
+        }
+
+        searchInput.addEventListener("input", filter);
+        citiesSelect.addEventListener("change", filter);
+
+        // Affichage initial
         display(eventsArray);
     });
 </script>

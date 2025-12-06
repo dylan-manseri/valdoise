@@ -6,10 +6,12 @@
 }
 h1{
     font-family: 'Playfair Display', serif;
+    text-align: center;
+    font-size: 45px;
 }
 #map{
     position: absolute;
-    height: 90%;
+    height: 85%;
     width: 100%;
 }
 :root {
@@ -36,4 +38,39 @@ a{
     font-family: 'Playfair Display', serif;
     font-size: 50px;
     margin-bottom: 50px;
+}
+
+.h2-question{
+    text-align: left;
+    font-family: 'Playfair Display', serif;
+    font-size: 50px;
+    margin-bottom: 50px;
+}
+
+.question-parent{
+    display: flex;
+    flex-direction: row;
+}
+
+.question-child{
+    display: flex;
+    flex-direction: column;
+}
+
+.question{
+    display: block;
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.question-symbole{
+    display: block;
+    margin-bottom: 20px;
+    padding-top: 22px;
+    font-size: 20px;
+}
+
+.question:last-child{
+    display: block;
+    margin-bottom: auto;
 }
