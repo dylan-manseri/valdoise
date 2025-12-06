@@ -121,7 +121,15 @@ function display(eventsList) {
         favBtn.dataset.id = event.uid;
         favBtn.textContent = userFavorites.includes(event.uid) ? "❤️" : "♡";
         
-        favBtn.addEventListener("click", () => toggleFavorite(favBtn));
+        favBtn.addEventListener("click", () => {
+            const isLoggedIn = <?= $login ? 'true' : 'false' ?>;
+            if(!isLoggedIn){
+                // Rediriger vers la page de connexion
+                window.location.href = "connexion.php";
+                return;
+            }
+            toggleFavorite(favBtn);
+        });
         card.appendChild(favBtn);
 
         resultsDiv.appendChild(card);
